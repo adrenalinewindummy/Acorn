@@ -1,0 +1,88 @@
+   10MODE2
+   20PROCloadMap
+   30PROCsetup
+   31GCOL0,134
+   32VDU24,0;0;1279;510;:CLG
+   33GCOL0,132
+   34VDU24,0;510;1279;1019;:CLG
+   40PROCmain
+   50MODE0
+   60END
+   70DEFPROCmain
+   80finish=FALSE
+   90W=1279
+   91h=1019
+  100REPEAT
+  110FORX=0TOW STEP 16
+  120cameraX=2*X/W-1
+  130rayDirX=dirX+planeX*cameraX
+  140rayDirY=dirY+planeY*cameraX
+  150mapX=INT(posX)
+  160mapY=INT(posY)
+  170IF rayDirX=0 THEN rayDirX=5000
+  180deltaDistX=ABS(1/rayDirX)
+  190IF rayDirY=0 THEN rayDirY=5000
+  200deltaDistY=ABS(1/rayDirY)
+  210hit=0
+  220IF rayDirX<0 stepX=-1: sideDistX=(posX-mapX)*deltaDistX ELSE  stepX=1:sideDistX=(mapX+1-posX)*deltaDistX 
+  230IF rayDirY<0 stepY=-1:sideDistY=(posY-mapY)*deltaDistY ELSE stepY=1:sideDistY=(mapY+1-posY)*deltaDistY
+  240REPEAT
+  250IFsideDistX<sideDistY THEN sideDistX=sideDistX+deltaDistX:mapX=mapX+stepX:side=0 ELSE sideDistY=sideDistY+deltaDistY:mapY=mapY+stepY:side=1
+  260IFworldMap(mapX,mapY)>0 THEN hit=1
+  261UNTILhit>0
+  270IF side=0 THEN perpWallDist=sideDistX-deltaDistX ELSE perpWallDist=sideDistY-deltaDistY
+  280lineHeight=INT(h/perpWallDist)
+  290drawStart=-lineHeight/2+h/2
+  300IFdrawStart<0 THEN drawStart=0
+  301drawEnd=lineHeight/2+h/2
+  302IF drawEnd>=h THEN drawEnd=h-1
+  303GCOL0,(worldMap(mapX,mapY)+127)
+  304VDU24,X;drawStart;X+8;drawEnd;:CLG:VDU26
+  310NEXT X
+  320UNTIL finish
+  330ENDPROC
+  340DEFPROCsetup
+  341GCOL0,305
+  350posX=22:posY=12
+  360dirX=-0.5:dirY=-0.5
+  370planeX=0:planeY=0.66
+  380time=0:oldTime=0
+  390ENDPROC
+  400DEFPROCloadMap
+  410mapWidth=24
+  420mapHeight=24
+  430ScreenWidth=1279
+  440ScreenHeight=1023
+  450DIMworldMap(mapWidth-1,mapHeight-1)
+  460FORY=0 TO mapHeight-1
+  470FORX=0 TO mapWidth-1
+  480READworldMap(X,Y)
+  490NEXT X
+  500NEXT Y
+  510ENDPROC
+  520DATA 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+  530DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  540DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  550DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  560DATA 1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1
+  570DATA 1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1
+  580DATA 1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1
+  590DATA 1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1
+  600DATA 1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1
+  610DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  620DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  630DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  640DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  650DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  660DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  670DATA 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  680DATA 1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  690DATA 1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  700DATA 1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  710DATA 1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  720DATA 1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  730DATA 1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  740DATA 1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+  750DATA 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+
+
